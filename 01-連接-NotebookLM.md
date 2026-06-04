@@ -1,9 +1,38 @@
 # Codex 懶人包 #01：連接 Google NotebookLM
 
-> 版本：v0.1（Codex 版）
-> 更新日期：2026-04-26
+> 版本：v0.3（實作後更新，跨 agent 通用）
+> 更新日期：2026-06-04
 
 > 📌 **本懶人包可獨立執行**：會自動檢查並安裝所需工具。
+
+---
+
+## 🆕 v0.3 實作後重大更新（先讀這段）
+
+實際在 Cowork / Antigravity 桌面版操作後得到的關鍵教訓：
+
+1. **不一定要把 MCP 接進 agent。** `nlm` 是一支獨立 CLI，MCP 只是它的包裝層。
+   只要 `nlm` 在 PATH，**任何有 shell 的 agent（Claude Code、Codex、Gemini、Antigravity、OpenCode…）
+   都能直接呼叫 `nlm` 完成所有 NotebookLM 操作** —— 這才是「所有 agent 都能用」的通用解。
+2. **新版 Cowork / Antigravity 桌面 app 不載入 `~/.claude/settings.json` 的 `mcpServers`**。
+   所以 `nlm setup add claude-code` 寫好設定、重啟，agent 裡仍看不到工具。→ 別等 MCP，直接用 CLI。
+3. **繁中 Windows 跑 `nlm` 可能 cp950 編碼崩潰** → 每次先
+   `export PYTHONUTF8=1 PYTHONIOENCODING=utf-8`（PowerShell：`$env:PYTHONUTF8=1`）。
+
+➡️ 「直接用 CLI 操控 NotebookLM」的完整指令與範例（含音檔轉逐字稿）見
+**[`skills/01-notebooklm/SKILL.md`](skills/01-notebooklm/SKILL.md)**。
+本檔以下為「把 MCP 註冊進各 agent」的選配步驟。
+
+### 一次讓所有 agent 都能用
+
+```bash
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+# 安裝 skill（各 agent 原生知道 nlm 工作流）
+for t in claude-code codex gemini-cli antigravity opencode agents; do nlm skill install "$t"; done
+# 註冊 MCP（給會載入 MCP 的 agent）
+for c in codex gemini-cli antigravity opencode; do nlm setup add "$c"; done
+nlm skill list && nlm setup list   # 驗證
+```
 
 ---
 
